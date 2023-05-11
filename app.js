@@ -1,22 +1,34 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { graphqlHTTP } = require('express-graphql');
-const { buildSchema } = require('graphql');
+const express = require("express");
+const bodyParser = require("body-parser");
+const { graphqlHTTP } = require("express-graphql");
+const { buildSchema } = require("graphql");
 
 const app = express();
-
+const events = [];
 app.use(bodyParser.json());
 
 app.use(
-  '/graphql',
+  "/graphql",
   graphqlHTTP({
     schema: buildSchema(`
-        type RootQuery {
-            events: [String!]!
+        type Event {
+          _id: ID!
+          title: String!
+          description: String!
+          price: Float!
+          date: String! 
         }
-
+        input EventInput {
+          title: String!
+          description: String!
+          price: Float!
+          date: String!
+        }
+        type RootQuery {
+            events: [Event!]!
+        }
         type RootMutation {
-            createEvent(name: String): String
+            createEvent(eventInput: EventInput): Event
         }
 
         schema {
@@ -26,17 +38,18 @@ app.use(
     `),
     rootValue: {
       events: () => {
-        return ['Romantic Cooking', 'Sailing', 'All-Night Coding'];
+        return events;
       },
       createEvent: (args) => {
-        const eventName = args.name;
-        return eventName;
-      }
+        let event = {...args.eventInput, _id: Math.random().toString()};
+        events.push(event)
+        return event;
+      },
     },
-    graphiql: true
+    graphiql: true,
   })
 );
 
 app.listen(3000, () => {
-  console.log("Server Started!")
+  console.log("Server Started!");
 });
