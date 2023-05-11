@@ -2,9 +2,10 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { graphqlHTTP } = require("express-graphql");
 const { buildSchema } = require("graphql");
+const mongoose = require("mongoose");
+const Event = require("./models/events");
 
 const app = express();
-const events = [];
 app.use(bodyParser.json());
 
 app.use(
@@ -37,19 +38,45 @@ app.use(
         }
     `),
     rootValue: {
-      events: () => {
-        return events;
+      events: async() => {
+        return Event.find()
+          .then((events) =>
+            events.map((e) => {
+              return { ...e._doc, _id: e.id};
+            })
+          )
+          .catch((err) => console.log({ err }));
       },
-      createEvent: (args) => {
-        let event = {...args.eventInput, _id: Math.random().toString()};
-        events.push(event)
-        return event;
+      createEvent: async(args) => {
+        // let event = { ...args.eventInput, _id: Math.random().toString() };
+        const event = new Event({
+          ...args.eventInput,
+          date: new Date(args.eventInput.date),
+        });
+        return event
+          .save()
+          .then((res) => {
+            console.log({ res });
+            return { ...res._doc };
+          })
+          .catch((err) => {
+            console.log({ err });
+            throw err;
+          });
       },
     },
     graphiql: true,
   })
 );
-
-app.listen(3000, () => {
-  console.log("Server Started!");
-});
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@atlascluster.xacsvte.mongodb.net/${process.env.MONGO_DB}?retryWrites=true`
+  )
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server Started!");
+    });
+  })
+  .catch((err) => {
+    console.log({ err });
+  });
