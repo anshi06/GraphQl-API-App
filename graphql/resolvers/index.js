@@ -86,7 +86,7 @@ module.exports = {
       description: args.eventInput.description,
       price: +args.eventInput.price,
       date: new Date(args.eventInput.date),
-      creator: '5c0fbd06c816781c518e4f3e'
+      creator: '6462085a6e9f7493f1c2b53f'
     });
     let createdEvent;
     try {
@@ -95,15 +95,15 @@ module.exports = {
         ...result._doc,
         _id: result._doc._id.toString(),
         date: new Date(event._doc.date).toISOString(),
-        creator: user.bind(this, result._doc.creator)
+        creator: user.bind(this, result._doc.creator) // creator contains id, email, password, createdEvents
       };
-      const creator = await User.findById('5c0fbd06c816781c518e4f3e');
+      const creator = await User.findById('6462085a6e9f7493f1c2b53f');
 
       if (!creator) {
         throw new Error('User not found.');
       }
       creator.createdEvents.push(event);
-      await creator.save();
+      await creator.save(); // Update the user db
 
       return createdEvent;
     } catch (err) {
@@ -134,7 +134,7 @@ module.exports = {
   bookEvent: async args => {
     const fetchedEvent = await Event.findOne({ _id: args.eventId });
     const booking = new Booking({
-      user: '5c0fbd06c816781c518e4f3e',
+      user: '646208d06e9f7493f1c2b542',
       event: fetchedEvent
     });
     const result = await booking.save();
