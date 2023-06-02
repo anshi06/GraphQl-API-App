@@ -141,6 +141,7 @@ export default function Events() {
 
   const modalCancelHandler = () => {
     setCreating(false);
+    setSelectedEvent(null)
   };
 
   const showDetailHandler = (eventId) => {
@@ -148,7 +149,45 @@ export default function Events() {
     setSelectedEvent(selectedEvent);
     return selectedEvent;
   };
-  const bookEventHandler = () => {}
+  const bookEventHandler = () => {
+      if (!context.token) {
+        setSelectedEvent(null)
+        return;
+      }
+      const requestBody = {
+        query: `
+            mutation {
+              bookEvent(eventId: "${selectedEvent._id}") {
+                _id
+               createdAt
+               updatedAt
+              }
+            }
+          `
+      };
+  
+      fetch('http://localhost:9000/graphql', {
+        method: 'POST',
+        body: JSON.stringify(requestBody),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + context.token
+        }
+      })
+        .then(res => {
+          if (res.status !== 200 && res.status !== 201) {
+            throw new Error('Failed!');
+          }
+          return res.json();
+        })
+        .then(resData => {
+          console.log(resData);
+          setSelectedEvent(null)
+        })
+        .catch(err => {
+          console.log(err);
+        });
+  }
 
   return (
     <>
@@ -189,7 +228,7 @@ export default function Events() {
           canConfirm
           onCancel={modalCancelHandler}
           onConfirm={bookEventHandler}
-          confirmText="Book"
+          confirmText={context.token ? 'Book' : 'Confirm'}
         >
           <h1>{selectedEvent.title}</h1>
           <h2>
