@@ -1,0 +1,28 @@
+.events-control {
+    text-align: center;
+    font-size: large;
+    font-weight: 700;
+    font-family:cursive;
+    border: 1px solid #ccc9d2;
+    padding: 2rem;
+    margin: 2rem auto;
+    width: 70%;
+    max-width: 100%;
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-_oCtpwE8ZUHNpQl63HHwx_6JkYAc3Gf3Dw&usqp=CAU")
+  }
+
+  .events__list {
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-size: large;
+    width: 50%;
+    max-width: 90%;
+    margin: 2rem auto;
+    list-style: none;
+    padding: 0;
+  }
+  
+  .events__list-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #e3dfe8;
+  }

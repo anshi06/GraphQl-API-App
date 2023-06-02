@@ -19,19 +19,21 @@ function App() {
     setUserId(null)
   }
   return (
+    // useRoutes
     <BrowserRouter>
       <AuthContext.Provider value={{token: token, userId: userId, login: login, logout: logout}}>
         <MainNavigation />
         <main className="main">
           <Routes>
-            { !token && <Route path="/" element={<Navigate to="/auth" replace />} />}
             { token && <Route path="/" element={<Navigate to="/events" replace />} />}
             { token && <Route path="/auth" element={<Navigate to="/events" replace />} />}
             { !token && <Route path="/auth" Component={Auth} />}
+            { !token && <Route path="/" Component={Auth} />}
             <Route path="/events" Component={Events} />
            { token && <Route path="/bookings" Component={Bookings} />}
           </Routes>
         </main>
+        {!token && <Navigate to='/auth' replace/>}
       </AuthContext.Provider>
     </BrowserRouter>
   );
