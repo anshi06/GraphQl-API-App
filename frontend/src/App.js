@@ -8,28 +8,37 @@ import AuthContext from "./context/auth-context";
 import { useState } from "react";
 
 function App() {
-  const [token, setToken] = useState(null)
-  const [userId, setUserId] = useState(null)
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
   const login = (token, userId, tokenExpiration) => {
-    setToken(token)
-    setUserId(userId)
-  }
+    setToken(token);
+    setUserId(userId);
+  };
   const logout = () => {
-    setToken(null)
-    setUserId(null)
-  }
+    setToken(null);
+    setUserId(null);
+  };
   return (
+    // useRoutes
     <BrowserRouter>
-      <AuthContext.Provider value={{token: token, userId: userId, login: login, logout: logout}}>
+      <AuthContext.Provider
+        value={{ token: token, userId: userId, login: login, logout: logout }}
+      >
         <MainNavigation />
         <main className="main">
           <Routes>
-            { !token && <Route path="/" element={<Navigate to="/auth" replace />} />}
-            { token && <Route path="/" element={<Navigate to="/events" replace />} />}
-            { token && <Route path="/auth" element={<Navigate to="/events" replace />} />}
-            { !token && <Route path="/auth" Component={Auth} />}
+            {!token && (
+              <Route path="/*" element={<Navigate to="/auth" replace />} />
+            )}
+            {token && (
+              <Route path="/" element={<Navigate to="/events" replace />} />
+            )}
+            {token && (
+              <Route path="/auth" element={<Navigate to="/events" replace />} />
+            )}
+            {!token && <Route path="/auth" Component={Auth} />}
             <Route path="/events" Component={Events} />
-           { token && <Route path="/bookings" Component={Bookings} />}
+            {token && <Route path="/bookings" Component={Bookings} />}
           </Routes>
         </main>
       </AuthContext.Provider>
