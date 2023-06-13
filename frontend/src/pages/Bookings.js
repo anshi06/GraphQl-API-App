@@ -2,10 +2,13 @@ import { useContext, useEffect, useState } from "react";
 import AuthContext from "../context/auth-context";
 import Spinner from "../components/Spinner/Spinner";
 import BookingList from "../components/Bookings/BookingList/BookingList";
+import BookingsChart from "../components/Bookings/BookingsChart/BookingsChart";
+import BookingsControls from "../components/Bookings/BookingsControl/BookingsControls";
 
 export default function Bookings() {
   const [isLoading, setIsLoading] = useState(false);
   const [bookings, setBookings] = useState([]);
+  const [outputType, setOutputType] = useState('list');
   const context = useContext(AuthContext);
 
   useEffect(() => {
@@ -24,13 +27,14 @@ export default function Bookings() {
                    _id
                    title
                    date
+                   price
                  }
                 }
               }
             `,
     };
 
-   await fetch("http://localhost:9000/graphql", {
+    await fetch("http://localhost:9000/graphql", {
       method: "POST",
       body: JSON.stringify(requestBody),
       headers: {
@@ -53,8 +57,8 @@ export default function Bookings() {
         setIsLoading(false);
       });
   };
-  const deleteBookingHandler = bookingId => {
-   setIsLoading(true)
+  const deleteBookingHandler = (bookingId) => {
+    setIsLoading(true);
     const requestBody = {
       query: `
           mutation CancelBooking($id: ID!){
@@ -65,45 +69,69 @@ export default function Bookings() {
           }
         `,
       variables: {
-        id: bookingId
-      }
+        id: bookingId,
+      },
     };
 
-    fetch('http://localhost:9000/graphql', {
-      method: 'POST',
+    fetch("http://localhost:9000/graphql", {
+      method: "POST",
       body: JSON.stringify(requestBody),
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + context.token
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + context.token,
+      },
     })
-      .then(res => {
+      .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Failed!');
+          throw new Error("Failed!");
         }
         return res.json();
       })
-      .then(resData => {
-          const updatedBookings = bookings.filter(booking => {
-            return booking._id !== bookingId;
-          });
-          setBookings(updatedBookings)
-          setIsLoading(false)
-          return updatedBookings;
+      .then((resData) => {
+        const updatedBookings = bookings.filter((booking) => {
+          return booking._id !== bookingId;
+        });
+        setBookings(updatedBookings);
+        setIsLoading(false);
+        return updatedBookings;
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
-        setIsLoading(false)
+        setIsLoading(false);
       });
   };
+  const changeOutputTypeHandler = (outputType) => {
+    if (outputType === "list") {
+      setOutputType("list")
+    } else {
+      setOutputType("chart")
+    }
+  };
+
+  const content = isLoading ? (
+    <Spinner />
+  ) : (
+    <>
+      <BookingsControls
+        activeOutputType={outputType}
+        onChange={changeOutputTypeHandler}
+      />
+      <div>
+        {outputType === "list" ? (
+          <BookingList
+            bookings={bookings}
+            onDelete={deleteBookingHandler}
+          />
+        ) : (
+          <BookingsChart bookings={bookings} />
+        )}
+      </div>
+    </>
+  );
 
   return (
     <>
-      {isLoading ? (
-        <Spinner />
-      ) : (
-       <BookingList bookings={bookings} onDelete={deleteBookingHandler}/>
-      )}
+      {content}
     </>
   );
 }
